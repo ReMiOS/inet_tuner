@@ -5,5 +5,7 @@ Simple tool to edit internet radio stream favorites on Denon and Marantz receive
 Database scheme based on [YTuner](https://github.com/coffeegreg/YTuner) and updates from [Radio-Browser](https://api.radio-browser.info/)
 Tested on Denon DNP-F109
 
+! Use at own risk !
+
 # Screenshot
 ![iNET_Tuner](img/inet_tuner.png)  

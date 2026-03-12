@@ -237,39 +237,43 @@ def create_connection( db_file=DB_FILE ):
     conn = sqlite3.connect( db_file, timeout=30 )
     conn.execute( 'PRAGMA journal_mode=WAL;' )
     conn.execute( 'PRAGMA synchronous=NORMAL;' )
+    conn.execute("PRAGMA temp_store=MEMORY;")
+    conn.execute("PRAGMA cache_size=-200000;")
     return conn
 
 def get_session( retries = requests_retries ):
-    session = requests.Session()
+    
+    if 'session' not in thread_local:
+        session = requests.Session()
+        if retries:
+            # ---- Retry strategy ----
+            # timeout     = hoe lang ik wacht op antwoord
+            # backoff     = hoe lang ik wacht vóór ik opnieuw probeer
+            # retries     = hoe vaak ik het probeer
 
-    if retries:
-        # ---- Retry strategy ----
-        # timeout     = hoe lang ik wacht op antwoord
-        # backoff     = hoe lang ik wacht vóór ik opnieuw probeer
-        # retries     = hoe vaak ik het probeer
+            backoff: float = 1.0    # 1s, 2s, 4s ( 1.0 x 2^n (n=0,1,2,3,4... bij retry=1,2,3,4,5....))
+            retry_strategy = Retry(
+                total=retries,
+                connect=retries,
+                read=retries,
+                status=retries,
+                backoff_factor=backoff,
+                status_forcelist=[ 500, 502, 503, 504 ], # Bij deze HTTP statuscodes mag automatisch een retry gebeuren. 500=Internal Server Error /502=Bad Gateway / 503=Service Un>
+                allowed_methods=[ 'GET', 'POST' ],
+                raise_on_status=False,
+            )
 
-        backoff: float = 1.0    # 1s, 2s, 4s ( 1.0 x 2^n (n=0,1,2,3,4... bij retry=1,2,3,4,5....))
-        retry_strategy = Retry(
-            total=retries,
-            connect=retries,
-            read=retries,
-            status=retries,
-            backoff_factor=backoff,
-            status_forcelist=[ 500, 502, 503, 504 ], # Bij deze HTTP statuscodes mag automatisch een retry gebeuren. 500=Internal Server Error /502=Bad Gateway / 503=Service Un>
-            allowed_methods=[ 'GET', 'POST' ],
-            raise_on_status=False,
-        )
+            adapter = requests.adapters.HTTPAdapter(
+                max_retries=retry_strategy,
+                pool_connections=10,
+                pool_maxsize=10,
+            )
 
-        adapter = requests.adapters.HTTPAdapter(
-            max_retries=retry_strategy,
-            pool_connections=10,
-            pool_maxsize=10,
-        )
-
-        session.mount( 'http://', adapter )
-        session.mount( 'https://', adapter )
-
-    return session
+            session.mount( 'http://', adapter )
+            session.mount( 'https://', adapter )
+        
+        thread_local["session"] = session
+    return thread_local["session"]
     
 # ICD REST API aanroep
 def rest_api( session, request_url, request_type, xml_data=None, timeout=5 ):
@@ -484,12 +488,13 @@ def fetch_all_stations(api_url):
 
 def fetch_station_by_uuid( uuid ):
     try:
-        if 'session' not in thread_local:
-            session = get_session()
-            thread_local[ 'session' ] = session
-        session = thread_local[ 'session' ]
-        url = API_BY_UUID.format( uuid )
-        
+        if False:
+            if 'session' not in thread_local:
+                session = get_session()
+                thread_local[ 'session' ] = session
+            session = thread_local[ 'session' ]
+        session = get_session()
+        url = API_BY_UUID.format( uuid )        
         data = api_call( session, url, 'GET' )
         
         return data[0] if data else None
@@ -503,6 +508,8 @@ def _tcp_check(host, port, timeout=3):
         # 1. DNS check
         # -------------------------
         ip = socket.gethostbyname(host)
+        if not ip:
+            return False
 
         # -------------------------
         # 2. TCP connect check
@@ -702,10 +709,11 @@ class StreamerGUI:
         self.root.geometry( f'{width}x{height}+{x}+{y}' )
 
         self.ip_var = tk.StringVar()
-        self.db_var = tk.StringVar( value='stations.db' )
-        self.legacy_var = tk.BooleanVar()
-        self.status_var = tk.StringVar( value='Gereed' )
+        self.db_var = tk.StringVar( value=DB_FILE )
+        self.legacy_var = tk.BooleanVar( value=True )
         self.update_checkbox_var = tk.BooleanVar( value=True )
+        self.status_var = tk.StringVar( value='Gereed' )
+        
         self.build_ui()
         self.load_config()
         self.update_thread = None
@@ -729,8 +737,8 @@ class StreamerGUI:
         if self._debounce_after_id is not None:
             self.root.after_cancel( self._debounce_after_id )
 
-        # Plan update na 1000ms
-        self._debounce_after_id = self.root.after( 1000, self.update_model_name_title )
+        # Plan update na 10.000ms
+        self._debounce_after_id = self.root.after( 10000, self.update_model_name_title )
         
                
     def update_model_name_title( self ):
@@ -772,16 +780,14 @@ class StreamerGUI:
 
     def update_now_playing( self ):
         ip = self.ip_var.get().strip()
-        if not ip:
-            return
-            
+
         # Stop als geen streamer
-        if not getattr( self, 'streamer_found', False ):
+        if not ip or not getattr( self, 'streamer_found', False ):
             if args.debug:
                 self.log( 'Geen streamer gevonden, skip Now Playing update' )
             self.root.after( 5000, self.update_now_playing )
             return
-
+            
         def worker(ip):
             try:
                 url = STATUS_API_ENDPOINT.format( ip )
@@ -880,8 +886,8 @@ class StreamerGUI:
         if os.path.exists( CONFIG_FILE ):
             config.read( CONFIG_FILE )
             self.ip_var.set( config.get( 'settings', 'ip', fallback='' ) )
-            self.db_var.set( config.get( 'settings', 'database', fallback='stations.db' ))
-            self.legacy_var.set( config.getboolean( 'settings','legacy', fallback=False ))
+            self.db_var.set( config.get( 'settings', 'database', fallback=DB_FILE ))
+            self.legacy_var.set( config.getboolean( 'settings','legacy', fallback=True ))
             self.update_checkbox_var.set( config.getboolean( 'settings','update_db', fallback=True ))
 
     def save_config( self ):
@@ -1362,7 +1368,7 @@ class StreamerGUI:
                         inserted += 1
                         
                     sync_tags( cursor, id_station, station.get( 'tags','' ) )
-                    inserted += 1
+
                 conn.commit()
                 self.log( f'{inserted} nieuwe stations toegevoegd van {api_url}' )
             self.log( 'Importeren nieuwe stations voltooid' )
@@ -1395,7 +1401,7 @@ class StreamerGUI:
 
         self.log( f'{total} stations worden bijgewerkt...' )
 
-        with ThreadPoolExecutor( max_workers=6 ) as executor:
+        with ThreadPoolExecutor( max_workers=8 ) as executor:
             # Stop-event meegeven aan elke worker
             futures = { executor.submit( update_station_worker, uuid, self.stop_update_event ): uuid for uuid in uuids }
 

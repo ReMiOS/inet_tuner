@@ -34,7 +34,7 @@ http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PW?
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVUP
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVUP
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVDOWN
-http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV05
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV05 (CAREFUL!!)
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV?
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MUON
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MUOFF
@@ -44,6 +44,12 @@ http://<receiver-ip>/goform/formiPhoneAppDirect.xml?SIAUX1
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?SIIRADIO
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?TFAN104.100
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?TPAN01
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PSTONE CTRL ON
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PSTONE CTRL OFF
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PSBAS UP
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PSBAS DOWN
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PSTRE UP
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PSTRE DOWN
 http://<receiver-ip>/goform/formiPhoneAppControlJudge.xml
 http://<receiver-ip>/NetAudio/art.asp-jpg?1630075616
 

@@ -1,9 +1,9 @@
 # iNET Tuner
-Denon / Marantz Receiver - Internet Radiostream Favorite editor making use op REST-API commands.
-Simple tool to edit internet radio stream favorites on Denon and Marantz receivers and streamers.
+Denon / Marantz Receiver - Internet Radiostream Favorite editor making use op REST-API commands.<br>
+Simple tool to edit internet radio stream favorites on Denon and Marantz receivers and streamers.<br>
 
-Database scheme based on [YTuner](https://github.com/coffeegreg/YTuner) 
-and updates from [Radio-Browser](https://api.radio-browser.info/)
+Database scheme based on [YTuner](https://github.com/coffeegreg/YTuner) <br>
+and updates from [Radio-Browser](https://api.radio-browser.info/)<br>
 
 Tested on Denon DNP-F109
 
@@ -14,9 +14,9 @@ Tested on Denon DNP-F109
 
 # Denon REST-API commands
 
-There is no known documentation about this REST-API from Denon.
-Depending on your model they can work (tested on Denon DNP F109)
-For instance the formiPhoneAppDirect.xml ENDPOINT seems unavailable on Denon AVR X1300W
+There is no known documentation about this REST-API from Denon.<br>
+Depending on your model they can work (tested on Denon DNP F109)<br>
+For instance the formiPhoneAppDirect.xml ENDPOINT seems unavailable on Denon AVR X1300W<br>
 
 ```
 http://<ip-address>/goform/Deviceinfo.xml

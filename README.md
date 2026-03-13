@@ -65,12 +65,23 @@ http://<receiver-ip>/goform/AppCommand.xml
    <cmd id="1">GetDeletedSource</cmd>
    <cmd id="1">GetDeletedNetworkSource</cmd>
    <cmd id="1">GetSystemFavoriteList</cmd>
+   <cmd id="1">GetSurroundModeStatus</cmd>
+   <cmd id="1">GetRestorerModeStatus</cmd>
   </tx>
   
 http://<receiver-ip>/goform/AppCommand.xml
 <?xml version="1.0" encoding="utf-8"?>
 <tx>
    <cmd id="1">SetAddToSystemFavorite</cmd>
+   <value>24</value>
+</tx>
+
+
+http://<receiver-ip>/goform/AppCommand.xml
+<?xml version="1.0" encoding="utf-8"?>
+<tx>
+   <cmd id="1">SetAddToSystemFavorite</cmd>
+   <zone>Main</zone>
    <value>24</value>
 </tx>
 

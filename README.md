@@ -16,8 +16,9 @@ Tested on Denon DNP-F109
 
 There is no known documentation about this REST-API from Denon.<br>
 Depending on your model they can work (tested on Denon DNP F109)<br>
-For instance the formiPhoneAppDirect.xml ENDPOINT seems unavailable on Denon AVR X1300W<br>
-
+For instance the formiPhoneAppDirect.xml endpoint seems unavailable on Denon AVR X1300W<br>
+Note that the AppCommand.xml endpoint expects an xml with linebreaks!<br>
+<br>
 ```
 http://<ip-address>/goform/Deviceinfo.xml
 http://<ip-address>/goform/formNetAudio_StatusXml.xml

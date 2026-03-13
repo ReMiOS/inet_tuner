@@ -30,10 +30,12 @@ http://<ip-address>/goform/formiPhoneAppFavorite_Call.xml?01
 
 http://<ip-address>/goform/formiPhoneAppDirect.xml?PWON
 http://<ip-address>/goform/formiPhoneAppDirect.xml?PWSTANDBY
+http://<ip-address>/goform/formiPhoneAppDirect.xml?PW?
 http://<ip-address>/goform/formiPhoneAppDirect.xml?MVUP
 http://<ip-address>/goform/formiPhoneAppDirect.xml?MVUP
 http://<ip-address>/goform/formiPhoneAppDirect.xml?MVDOWN
 http://<ip-address>/goform/formiPhoneAppDirect.xml?MV05
+http://<ip-address>/goform/formiPhoneAppDirect.xml?MV?
 http://<ip-address>/goform/formiPhoneAppDirect.xml?MUON
 http://<ip-address>/goform/formiPhoneAppDirect.xml?MUOFF
 http://<ip-address>/goform/formiPhoneAppDirect.xml?SITUNER

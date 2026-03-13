@@ -20,39 +20,39 @@ For instance the formiPhoneAppDirect.xml endpoint seems unavailable on Denon AVR
 Note that the AppCommand.xml endpoint expects an xml with linebreaks! (newline or carriage return)<br>
 <br>
 ```
-http://<ip-address>/goform/Deviceinfo.xml
-http://<ip-address>/goform/formNetAudio_StatusXml.xml
+http://<receiver-ip>/goform/Deviceinfo.xml
+http://<receiver-ip>/goform/formNetAudio_StatusXml.xml
 
-http://<ip-address>/goform/formiPhoneAppPower.xml?1+PowerOn
-http://<ip-address>/goform/formiPhoneAppPower.xml?1+PowerStandby
+http://<receiver-ip>/goform/formiPhoneAppPower.xml?1+PowerOn
+http://<receiver-ip>/goform/formiPhoneAppPower.xml?1+PowerStandby
 
-http://<ip-address>/goform/formiPhoneAppFavorite_Call.xml?01
+http://<receiver-ip>/goform/formiPhoneAppFavorite_Call.xml?01
 
-http://<ip-address>/goform/formiPhoneAppDirect.xml?PWON
-http://<ip-address>/goform/formiPhoneAppDirect.xml?PWSTANDBY
-http://<ip-address>/goform/formiPhoneAppDirect.xml?PW?
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MVUP
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MVUP
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MVDOWN
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MV05
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MV?
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MUON
-http://<ip-address>/goform/formiPhoneAppDirect.xml?MUOFF
-http://<ip-address>/goform/formiPhoneAppDirect.xml?SITUNER
-http://<ip-address>/goform/formiPhoneAppDirect.xml?SIUSB
-http://<ip-address>/goform/formiPhoneAppDirect.xml?SIAUX1
-http://<ip-address>/goform/formiPhoneAppDirect.xml?SIIRADIO
-http://<ip-address>/goform/formiPhoneAppDirect.xml?TFAN104.100
-http://<ip-address>/goform/formiPhoneAppDirect.xml?TPAN01
-http://<ip-address>/goform/formiPhoneAppControlJudge.xml
-http://<ip-address>/NetAudio/art.asp-jpg?1630075616
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PWON
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PWSTANDBY
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PW?
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVUP
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVUP
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVDOWN
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV05
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV?
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MUON
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MUOFF
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?SITUNER
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?SIUSB
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?SIAUX1
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?SIIRADIO
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?TFAN104.100
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?TPAN01
+http://<receiver-ip>/goform/formiPhoneAppControlJudge.xml
+http://<receiver-ip>/NetAudio/art.asp-jpg?1630075616
 
-http://<ip-address>:8080/description.xml
-http://<ip-address>:8080/RenderingControl/desc.xml
-http://<ip-address>:8080/AVTransport/desc.xml
-http://<ip-address>/goform/AppCommand.xml
+http://<receiver-ip>:8080/description.xml
+http://<receiver-ip>:8080/RenderingControl/desc.xml
+http://<receiver-ip>:8080/AVTransport/desc.xml
+http://<receiver-ip>/goform/AppCommand.xml
 
-http://<ip-address>/goform/AppCommand.xml
+http://<receiver-ip>/goform/AppCommand.xml
   <?xml version="1.0" encoding="utf-8"?>
   <tx>
    <cmd id="1">GetAllZonePowerStatus</cmd>
@@ -67,19 +67,28 @@ http://<ip-address>/goform/AppCommand.xml
    <cmd id="1">GetSystemFavoriteList</cmd>
   </tx>
   
-http://<ip-address>/goform/AppCommand.xml
+http://<receiver-ip>/goform/AppCommand.xml
 <?xml version="1.0" encoding="utf-8"?>
 <tx>
    <cmd id="1">SetAddToSystemFavorite</cmd>
    <value>24</value>
 </tx>
 
-http://<ip-address>/goform/AppCommand.xml
+http://<receiver-ip>/goform/AppCommand.xml
 <tx>
     <cmd id="1">SetvTunerPlay</cmd>
     <title>Radio Station Name</title>
     <url>http://1.2.3.4:8080/;stream.mp3</url>
     <mime>MP3</mime>
 </tx>'
+
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=<COMMAND>
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeBtn/%3C
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeBtn/%3E
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeSet/-45.0
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_InputFunction%2FSAT%2FCBL
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_InputFunction%2FCD
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_OnOff/ON
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_OnOff/OFF
 
 ```

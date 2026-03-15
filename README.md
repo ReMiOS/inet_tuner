@@ -2,7 +2,7 @@
 Denon / Marantz Receiver - Internet Radiostream Favorite editor making use op REST-API commands.<br>
 Simple tool to edit internet radio stream favorites on Denon and Marantz receivers and streamers.<br>
 
-Database scheme based on [YTuner Database](https://github.com/coffeegreg/YTuner](https://github.com/coffeegreg/YTuner/releases/tag/rb-db) <br>
+Database scheme based on [YTuner Database](https://github.com/coffeegreg/YTuner/releases/tag/rb-db) <br>
 and updates from [Radio-Browser](https://api.radio-browser.info/)<br>
 
 Tested on Denon DNP-F109

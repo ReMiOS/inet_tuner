@@ -28,6 +28,7 @@ http://<receiver-ip>/goform/formiPhoneAppPower.xml?1+PowerStandby
 
 http://<receiver-ip>/goform/formiPhoneAppFavorite_Call.xml?01
 
+http://<receiver-ip>/goform/formiPhoneAppTone_Status.xml
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PWON
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PWSTANDBY
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PW?

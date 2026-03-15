@@ -35,7 +35,7 @@ http://<receiver-ip>/goform/formiPhoneAppDirect.xml?PW?
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVUP
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVUP
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MVDOWN
-http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV05 (CAREFUL!!)
+http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV05 ((TAKE CAUTION !!))
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MV?
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MUON
 http://<receiver-ip>/goform/formiPhoneAppDirect.xml?MUOFF
@@ -103,7 +103,7 @@ http://<receiver-ip>/goform/AppCommand.xml
 http://<receiver-ip>/MainZone/index.put.asp?cmd0=<COMMAND>
 http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeBtn/%3C
 http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeBtn/%3E
-http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeSet/-45.0
+http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutMasterVolumeSet/-45.0  (TAKE CAUTION !!)
 http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_InputFunction%2FSAT%2FCBL
 http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_InputFunction%2FCD
 http://<receiver-ip>/MainZone/index.put.asp?cmd0=PutZone_OnOff/ON

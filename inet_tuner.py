@@ -241,8 +241,7 @@ def create_connection( db_file=DB_FILE ):
     conn.execute("PRAGMA cache_size=-200000;")
     return conn
 
-def get_session( retries = requests_retries ):
-    
+def get_session( retries = requests_retries ):    
     if 'session' not in thread_local:
         session = requests.Session()
         if retries:
@@ -364,8 +363,9 @@ def api_call( api_session, url, methode, xml_data=None ):
 def get_station_from_db(database, station_id, legacy):
     conn = sqlite3.connect(database)
     cursor = conn.cursor()
+    
     cursor.execute( '''
-        SELECT s.name, COALESCE(s.url_resolved, s.url), c.Name
+        SELECT s.name, COALESCE(NULLIF(s.url_resolved, ''), s.url), c.Name
         FROM stations s
         LEFT JOIN codecs c ON s.IDCodec = c.IDCodec
         WHERE s.IDStation = ?
@@ -374,7 +374,11 @@ def get_station_from_db(database, station_id, legacy):
     conn.close()
     if not row:
         raise Exception( 'Station niet gevonden' )
+    
     name, url, codec = row
+    if not url:
+        raise Exception( 'Geen URL gevonden' )
+        
     if legacy:
         url = url.replace( 'https://', 'http://' )
         if codec:
@@ -412,6 +416,8 @@ def insert_station( cursor, station ):
     bitrate = station.get( 'bitrate', 0 )
     lastcheckok = station.get( 'lastcheckok', 0 )
     lastcheckoktime = station.get( 'lastcheckoktime' )
+    # lastchecktime = station.get( 'lastchecktime' )
+    lastchecktime = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )
     geo_lat = station.get( 'geo_lat' )
     geo_long = station.get( 'geo_long' )
     id_country = get_or_create_id( cursor, 'countries', 'Name', station.get( 'country' ))
@@ -421,12 +427,12 @@ def insert_station( cursor, station ):
         INSERT INTO stations (
             stationuuid, name, url, url_resolved, homepage, favicon,
             IDCountry, IDLanguage, votes, IDCodec, bitrate,
-            lastcheckok, lastcheckoktime, geo_lat, geo_long
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            lastcheckok, lastcheckoktime, lastchecktime, geo_lat, geo_long
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         stationuuid, name, url, url_resolved, homepage, favicon,
         id_country, id_language, votes, id_codec,
-        bitrate, lastcheckok, lastcheckoktime,
+        bitrate, lastcheckok, lastcheckoktime, lastchecktime,
         geo_lat, geo_long
     ))
     if args.debug:
@@ -444,6 +450,8 @@ def update_station( cursor, station ):
     bitrate = station.get( 'bitrate', 0 )
     lastcheckok = station.get( 'lastcheckok', 0 )
     lastcheckoktime = station.get( 'lastcheckoktime' )
+    # lastchecktime = station.get( 'lastchecktime' )
+    lastchecktime = datetime.datetime.now().strftime( "%Y-%m-%d %H:%M:%S" )
     geo_lat = station.get( 'geo_lat' )
     geo_long = station.get( 'geo_long' )
     id_country = get_or_create_id( cursor, 'countries', 'Name', station.get( 'country' ))
@@ -453,13 +461,13 @@ def update_station( cursor, station ):
         UPDATE stations SET
             name = ?, url = ?, url_resolved = ?, homepage = ?, favicon = ?,
             IDCountry = ?, IDLanguage = ?, votes = ?, IDCodec = ?,
-            bitrate = ?, lastcheckok = ?, lastcheckoktime = ?,
+            bitrate = ?, lastcheckok = ?, lastcheckoktime = ?, lastchecktime = ?,
             geo_lat = ?, geo_long = ?
         WHERE stationuuid = ?
     """, (
         name, url, url_resolved, homepage, favicon,
         id_country, id_language, votes, id_codec,
-        bitrate, lastcheckok, lastcheckoktime,
+        bitrate, lastcheckok, lastcheckoktime, lastchecktime,
         geo_lat, geo_long, stationuuid
     ))
     cursor.execute( 'SELECT IDStation FROM stations WHERE stationuuid = ?', ( stationuuid, ) )
@@ -468,11 +476,16 @@ def update_station( cursor, station ):
         app.log( f'Station {name} bijgewerkt (uuid ={stationuuid})' )
     return row[0] if row else None
     
-    
+def update_station_lastchecktime_by_uuid( cursor, uuid ):
+    cursor.execute("""
+        UPDATE stations
+        SET lastchecktime = datetime( 'now', 'localtime' )
+        WHERE stationuuid = ?
+    """, ( uuid, ))
+    if args.debug:
+        logging.info( f'Station lastchecktime bijgewerkt (uuid ={uuid})' )
+        
 def sync_tags( cursor, id_station, tags_string ):
-    # bijvoorbeeld 'tags': 'charts,dance,deejay,dj,dj sets,edm,electronic,elektronik,festival,hits,house,minimal'
-    #                      20, 2951, 3062, 27, 3223, 29, 3511, 3527, 3826, 39, 41, 43
-    
     cursor.execute( 'DELETE FROM stationstags WHERE IDStation = ?', ( id_station, ) )
     if not tags_string:
         return
@@ -502,26 +515,26 @@ def fetch_station_by_uuid( uuid ):
         logging.error( f'Exception ocurred: {str(exc)}', exc_info=True )
         return None
 
-def _tcp_check(host, port, timeout=3):
+def _tcp_check( host, port, timeout=3 ):
     try:
         # -------------------------
         # 1. DNS check
         # -------------------------
-        ip = socket.gethostbyname(host)
+        ip = socket.gethostbyname( host )
         if not ip:
             return False
 
         # -------------------------
         # 2. TCP connect check
         # -------------------------
-        sock = socket.create_connection((ip, port), timeout=timeout)
+        sock = socket.create_connection(( ip, port ), timeout=timeout )
         sock.close()
         
         return True
     except Exception:
         return False
 
-def is_stream_url_alive(url, timeout=8):
+def is_stream_url_alive( url, timeout=8 ):
     """
     Controleert of een audiostream URL bereikbaar is.
     Werkt met Icecast, Shoutcast, MP3 streams en HLS.
@@ -544,7 +557,7 @@ def is_stream_url_alive(url, timeout=8):
         # -------------------------
         # Snelle TCP connect check
         # -------------------------
-        if not _tcp_check(host, port):
+        if not _tcp_check( host, port ):
             logging.info( f'Controle URL {url} Server {host}:{port} reageert niet op TCP check' )
             return False
 
@@ -585,7 +598,7 @@ def is_stream_url_alive(url, timeout=8):
             return False
             
         # geldige HTTP status
-        if not (200 <= response.status_code < 400):
+        if not ( 200 <= response.status_code < 400 ):
             logging.warning( f'Bad HTTP status: {response.status_code}' )
             return False
 
@@ -595,13 +608,13 @@ def is_stream_url_alive(url, timeout=8):
         content_type = response.headers.get( 'content-type', '' ).lower()
         logging.info( f'URL {url} is een {content_type} stream ' )
 
-        if any(v in content_type for v in valid_mime_types):
+        if any( v in content_type for v in valid_mime_types ):
             return True
 
         # -------------------------
         # 5. fallback: lees eerste bytes
         # -------------------------
-        chunk = next(response.iter_content(1024), None)
+        chunk = next( response.iter_content(1024), None )
 
         if chunk:
             return True
@@ -611,19 +624,15 @@ def is_stream_url_alive(url, timeout=8):
     except Exception as exc:
         logging.error( f'Stream check failed for {url}: {exc}' )
         return False
-
-
-def delete_station_by_uuid( uuid ):
+        
+def delete_station_by_uuid( cursor, uuid ):
     try:
-        conn = create_connection()
-        cursor = conn.cursor()
 
         # IDStation ophalen
         cursor.execute( 'SELECT IDStation FROM stations WHERE stationuuid = ?', ( uuid, ) )
         row = cursor.fetchone()
 
         if not row:
-            conn.close()
             return f'{uuid} - al verwijderd'
 
         id_station = row[0]
@@ -634,23 +643,22 @@ def delete_station_by_uuid( uuid ):
         # Daarna station verwijderen
         cursor.execute( 'DELETE FROM stations WHERE IDStation = ?', ( id_station, ) )
 
-        conn.commit()
-        conn.close()
-
         return f'{uuid} VERWIJDERD'
 
     except Exception as e:
         logging.error( 'Exeception occured', exc_info=True )
         return f'FOUT bij verwijderen {uuid}: {e}'
         
-def safe_delete_station( uuid, stream_url ):
+def safe_delete_station( cursor, uuid, stream_url ):
     if not is_stream_url_alive( stream_url ):
-        return delete_station_by_uuid( uuid )
+        return delete_station_by_uuid( cursor, uuid )
+    
+    update_station_lastchecktime_by_uuid( cursor, uuid )
     return f'{uuid} niet verwijderd (stream leeft nog)'
-        
-
 
 def update_station_worker( uuid, stop_event=None ):
+    
+    conn = None
     
     # check stop-event bij start
     if stop_event and stop_event.is_set():
@@ -666,29 +674,29 @@ def update_station_worker( uuid, stop_event=None ):
 
         # Fetch station data
         station = fetch_station_by_uuid( uuid )
+
         if stop_event and stop_event.is_set():
-            conn.close()
             return f'{uuid} update overgeslagen (gestopt)'
 
         if not station:
-            conn.close()
-            return safe_delete_station(uuid, current_url)
+            return safe_delete_station( cursor, uuid, current_url )
            
         id_station = update_station( cursor, station )
 
         if stop_event and stop_event.is_set():
-            conn.close()
             return f'{uuid} update overgeslagen (gestopt)'
             
         if id_station:
             sync_tags( cursor, id_station, station.get( 'tags', '' ) )
 
-        conn.commit()
-        conn.close()
         return f'''{station.get( 'name', uuid )} OK'''
 
     except Exception as e:
         return f'FOUT bij {uuid}: {e}'
+
+    finally:
+        conn.commit()
+        conn.close()
 
 # ===========================
 # GUI
@@ -723,7 +731,7 @@ class StreamerGUI:
         self.update_model_name_title()
         self.root.after( 2000, self.update_now_playing ) # eenmaling uitvoeren na 2000ms
         self._debounce_after_id = None
-        # Trace op IP-adres
+        # Trace IP-adres
         self.ip_var.trace_add( 'write', self.on_ip_change )
         
         # Stop-event voor update threads
@@ -1252,6 +1260,7 @@ class StreamerGUI:
         try:
             session = get_session()
             ip = self.ip_var.get()
+            
             # Stop als geen streamer
             if not ip or not getattr( self, 'streamer_found', False ):
                 if args.debug:
@@ -1261,7 +1270,7 @@ class StreamerGUI:
             num = str( int( self.fav_entry.get())).zfill( 2 )
             url = FAVORITE_API_ENDPOINT.format( ip, num )
             response = api_call( session, url, 'GET' )
-            # response = requests.get(url,timeout=10)
+            
             self.set_status( f'Favoriet kanaal {num} gekozen' )
             self.log( f'Favoriet kanaal {num} gekozen' )
         except Exception as e:
@@ -1388,8 +1397,8 @@ class StreamerGUI:
         cursor.execute("""
             SELECT stationuuid 
             FROM stations
-            WHERE lastcheckoktime IS NULL 
-            OR lastcheckoktime <= datetime('now', '-2 months')
+            WHERE lastchecktime IS NULL 
+            OR lastchecktime <= datetime('now', '-2 months')
         """)
         uuids = [ row[0] for row in cursor.fetchall() ]
         conn.close()
@@ -1401,7 +1410,7 @@ class StreamerGUI:
 
         self.log( f'{total} stations worden bijgewerkt...' )
 
-        with ThreadPoolExecutor( max_workers=8 ) as executor:
+        with ThreadPoolExecutor( max_workers=18 ) as executor:
             # Stop-event meegeven aan elke worker
             futures = { executor.submit( update_station_worker, uuid, self.stop_update_event ): uuid for uuid in uuids }
 

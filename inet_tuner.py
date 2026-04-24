@@ -13,7 +13,7 @@ import configparser
 import argparse
 import logging
 from logging.handlers import RotatingFileHandler
-import tkinter as tk
+import tkinter as tk    
 from tkinter import ttk, messagebox, filedialog
 from lxml import etree
 
